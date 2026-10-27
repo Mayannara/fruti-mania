@@ -20,23 +20,6 @@ VERIFICACAO_INTERFACE.md   verificação de uso e de acessibilidade
 
 Os scripts são carregados em ordem no fim do `index.html`, e cada um usa funções dos anteriores. Não há etapa de build nem dependências: os arquivos são servidos exatamente como estão.
 
-## Publicar no GitHub Pages
-
-1. Crie um repositório no GitHub (por exemplo, `frutimania`) e envie estes arquivos para a raiz, com o `index.html` no primeiro nível:
-   ```bash
-   git init
-   git add .
-   git commit -m "Interface da Máquina Estatística"
-   git branch -M main
-   git remote add origin https://github.com/SEU-USUARIO/frutimania.git
-   git push -u origin main
-   ```
-2. No repositório, abra **Settings → Pages**.
-3. Em **Build and deployment**, escolha **Source: Deploy from a branch**, depois **Branch: `main`**, pasta **`/ (root)`**, e clique em **Save**.
-4. Depois de 1 ou 2 minutos, o site fica disponível em `https://SEU-USUARIO.github.io/frutimania/`.
-
-Se preferir manter tudo no mesmo repositório do notebook, coloque estes arquivos numa pasta `docs/` e escolha a pasta **`/docs`** no passo 3.
-
 ## Rodar no computador
 
 Basta abrir o `index.html` no navegador. Para simular o GitHub Pages localmente:
@@ -54,6 +37,37 @@ python -m http.server 8000
 
 Com a semente fixa 2026, a sequência de giros é a mesma do Experimento 1 do notebook.
 
-## Uso de IA
+## Declaração de uso de Inteligência Artificial
 
-Declarar aqui, conforme a Seção 9 do enunciado, em que a IA ajudou e o que foi conferido pelo grupo.
+Este trabalho contou com o apoio do assistente de IA **Claude (Anthropic)**, usado como ferramenta de apoio à programação e à revisão. 
+As decisões sobre o modelo, a interpretação dos resultados e o texto do relatório são do grupo.
+
+### Em que a IA ajudou
+
+- **Revisão do notebook:** comparou o código com os requisitos obrigatórios do enunciado
+  e apontou o que faltava (exibição de uma rodada, aviso de créditos fictícios, exportação
+  em CSV, registro do ambiente, conferência da reprodução no E2, reutilização dos resultados
+  do E1 no E5).
+- **Interface web:** gerou o código HTML, CSS e JavaScript a partir do protótipo de tela
+  feito pelo grupo, incluindo o painel do administrador, o salvamento local e a versão
+  para celular, e realizou testes automáticos de acessibilidade.
+
+### O que o grupo conferiu
+- Executamos o notebook do início ao fim no Google Colab e confirmamos que os resultados
+  batem com os valores de referência do enunciado (E[X] = −0,16, RTP = 84%, chance de
+  prêmio = 4%, RTP de 92,4% na tabela +10%).
+- Refizemos à mão os cálculos de probabilidade, esperança e RTP da Seção 6.
+- Verificamos os totais exigidos: 10.000 contagens no E1, 100 participantes no E3 e
+  9.999 pares no E4.
+- Testamos a interface: fluxo do jogador, painel do administrador, uso só com teclado e
+  versão para celular. Também conferimos que a semente 2026 reproduz os mesmos resultados
+  do Experimento 1.
+- Lemos e discutimos o código para que todos os integrantes consigam explicá-lo.
+
+### O que não foi feito com IA
+- O protótipo de tela, a escolha do tema e das cores.
+- A interpretação dos experimentos e a discussão crítica do relatório.
+- A pesquisa e a leitura das fontes citadas
+- Decisões de comportamento do protótipo
+
+
