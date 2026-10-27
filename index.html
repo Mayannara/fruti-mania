@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FrutiMania – Máquina Estatística</title>
+<meta name="description" content="Simulador acadêmico de máquina de rolos com regras públicas (Probabilidade e Estatística I – IFES). Somente créditos fictícios.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Pular para o conteúdo</a>
+<div id="sr" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">🎰</div>
+      <div>
+        <div class="brand-name">FrutiMania</div>
+        <span class="brand-tag" id="aviso-academico">Simulador acadêmico - somente créditos fictícios</span>
+      </div>
+    </div>
+    <div class="top-actions" id="top-game" hidden>
+      <span class="chip opt-hide"><span class="lbl">Jogador</span><b id="h-jogador">–</b></span>
+      <span class="chip"><span class="lbl">Saldo</span><b id="h-saldo">0</b></span>
+      <span class="chip"><span class="lbl">Giros</span><b id="h-giros">0</b></span>
+    </div>
+    <div class="top-actions" id="top-admin" hidden>
+      <span class="badge moss">Admin</span>
+      <button class="btn btn-ghost btn-sm" id="btn-admin-sair" type="button">Sair do painel</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+
+<!-- ============ PASSO 1: DESEJA JOGAR? ============ -->
+<section id="tela-inicio" class="screen" aria-labelledby="t-inicio">
+  <div class="card panel center">
+    <div class="blob a"></div><div class="blob b"></div>
+    <div class="fruit-hero" aria-hidden="true" id="hero-frutas">🍓 🍇 🍍</div>
+    <div><span class="step">Passo 1 de 3 • Bem-vindo</span></div>
+    <h1 class="title" id="t-inicio" tabindex="-1">Deseja jogar na FrutiMania?</h1>
+    <p class="lead">Uma máquina de rolos didática, com regras públicas e créditos totalmente fictícios, para comparar o que parece acontecer com o que a probabilidade diz.</p>
+
+    <div class="rules-box" aria-labelledby="t-regras">
+      <h3 id="t-regras">Regras públicas desta máquina</h3>
+      <ul id="lista-regras"></ul>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary btn-lg" id="btn-sim" type="button">Sim, quero jogar</button>
+      <button class="btn btn-secondary btn-lg" id="btn-nao" type="button">Não, sair</button>
+    </div>
+    <div class="actions hidden" id="box-continuar" style="margin-top:12px">
+      <button class="btn btn-ghost" id="btn-continuar" type="button">Continuar sessão</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SAÍDA ============ -->
+<section id="tela-saida" class="screen hidden" aria-labelledby="t-saida">
+  <div class="card panel center">
+    <div class="fruit-hero" aria-hidden="true">👋</div>
+    <h1 class="title" id="t-saida" tabindex="-1">Obrigado pela visita!</h1>
+    <p class="lead">Você escolheu não jogar agora. Nenhum dado de jogo foi criado. Se quiser, pode voltar quando desejar.</p>
+    <div class="actions"><button class="btn btn-primary" type="button" data-go="tela-inicio">Voltar ao início</button></div>
+  </div>
+</section>
+
+<!-- ============ PASSO 2: NOME ============ -->
+<section id="tela-nome" class="screen hidden" aria-labelledby="t-nome">
+  <div class="card panel">
+    <div class="blob a"></div>
+    <div class="center"><span class="step">Passo 2 de 3 • Identificação</span>
+      <h1 class="title" id="t-nome" tabindex="-1">Como podemos te chamar?</h1>
+      <p class="lead">O nome aparece no placar da sua sessão e no histórico salvo neste navegador. Pode ser um apelido.</p>
+    </div>
+    <form id="form-nome" novalidate style="margin-top:22px;display:grid;gap:14px">
+      <div class="field">
+        <label for="inp-nome">Seu nome ou apelido</label>
+        <input class="input" id="inp-nome" name="nome" type="text" maxlength="24" autocomplete="nickname" aria-describedby="nome-hint nome-erro" required>
+        <span class="hint" id="nome-hint">De 2 a 24 caracteres.</span>
+        <span class="error" id="nome-erro" role="alert"></span>
+      </div>
+      <div id="box-recentes" class="hidden">
+        <span class="label" id="lbl-recentes">Jogadores recentes neste navegador</span>
+        <div class="recent" id="recentes" role="group" aria-labelledby="lbl-recentes"></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary" type="button" data-go="tela-inicio">Voltar</button>
+        <button class="btn btn-primary" type="submit">Continuar</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ============ PASSO 3: SALDO FICTÍCIO ============ -->
+<section id="tela-saldo" class="screen hidden" aria-labelledby="t-saldo">
+  <div class="card panel wide">
+    <div class="blob b"></div>
+    <div class="center"><span class="step">Passo 3 de 3 • Saldo fictício</span>
+      <h1 class="title" id="t-saldo" tabindex="-1"><span id="saldo-ola">Olá!</span> Escolha seu saldo inicial</h1>
+      <p class="lead">Cada giro custa 1 crédito fictício. Os créditos não têm valor em dinheiro e não há recarga durante a sessão.</p>
+    </div>
+    <form id="form-saldo" novalidate>
+      <fieldset style="border:none;padding:0;margin:0">
+        <legend class="sr-only">Saldo inicial em créditos fictícios</legend>
+        <div class="options" id="opcoes-saldo"></div>
+      </fieldset>
+      <span class="error" id="saldo-erro" role="alert"></span>
+      <div class="summary-bar" aria-live="polite">
+        <div><div class="hint">Saldo inicial selecionado</div><strong id="saldo-resumo">–</strong></div>
+        <div class="hint" id="saldo-resumo-2" style="max-width:360px"></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary" type="button" data-go="tela-nome">Voltar</button>
+        <button class="btn btn-primary" type="submit">Começar a jogar</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ============ JOGO ============ -->
+<section id="tela-jogo" class="screen hidden" aria-labelledby="t-jogo">
+  <h1 class="sr-only" id="t-jogo" tabindex="-1">Máquina de rolos</h1>
+  <div class="toolbar">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span class="label" id="lbl-anim">Animação:</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lbl-anim" id="seg-anim">
+        <button type="button" role="radio" data-anim="normal">Normal</button>
+        <button type="button" role="radio" data-anim="rapida">Rápida</button>
+        <button type="button" role="radio" data-anim="nenhuma">Sem animação</button>
+      </div>
+    </div>
+    <button class="btn btn-danger btn-sm" id="btn-encerrar" type="button">Encerrar sessão</button>
+  </div>
+
+  <div class="game-grid">
+    <div class="g-machine">
+      <div class="machine">
+        <div class="machine-top">
+          <div class="lights" aria-hidden="true"><span style="background:var(--terra)"></span><span style="background:var(--gold)"></span><span style="background:var(--moss)"></span></div>
+          <div class="machine-name">🌿 FRUTI-SLOT DIDÁTICO 🌿</div>
+          <div class="lights" aria-hidden="true"><span style="background:var(--moss)"></span><span style="background:var(--gold)"></span><span style="background:var(--terra)"></span></div>
+        </div>
+        <div class="display" id="display" role="status" aria-live="polite">Pressione GIRAR para começar.</div>
+        <div class="reels" id="reels" role="img" aria-label="Tabuleiro 3 por 3">
+          <div class="reel" id="reel-0"></div>
+          <div class="reel" id="reel-1"></div>
+          <div class="reel" id="reel-2"></div>
+        </div>
+        <div class="payline-label" aria-hidden="true"><span>▲ topo / base: não pagam</span><span>linha central (contorno) = única avaliada</span></div>
+        <div class="spin-row">
+          <p class="hint">Atalho: tecla <span class="kbd">Espaço</span> para girar. O resultado é sorteado antes da animação; a animação só o apresenta.</p>
+          <button class="btn-spin" id="btn-girar" type="button">🎰 GIRAR <span style="font-size:.9rem;font-family:var(--font)">(1 crédito)</span></button>
+        </div>
+      </div>
+
+    </div>
+
+    <aside class="side g-side" aria-label="Painel da sessão">
+      <div class="card">
+        <h3>📊 Sua sessão <span class="badge moss" id="sess-id"></span></h3>
+        <div class="stats">
+          <div class="stat"><div class="k">Saldo</div><div class="v" id="s-saldo">0</div><div class="s" id="s-saldo-ini"></div></div>
+          <div class="stat"><div class="k">Resultado</div><div class="v" id="s-res">0</div><div class="s">saldo − saldo inicial</div></div>
+          <div class="stat"><div class="k">Giros</div><div class="v" id="s-giros">0</div><div class="s" id="s-premios">0 com prêmio</div></div>
+          <div class="stat"><div class="k">Esperado</div><div class="v" id="s-esp">0</div><div class="s" id="s-esp-sub">E[X] × giros</div></div>
+          <div class="stat"><div class="k">Freq. de prêmio</div><div class="v" id="s-freq">–</div><div class="s" id="s-freq-sub">teórica 4%</div></div>
+          <div class="stat"><div class="k">RTP da sessão</div><div class="v" id="s-rtp">–</div><div class="s" id="s-rtp-sub">teórico 84%</div></div>
+        </div>
+        <p class="note">Semente desta sessão: <b id="s-semente">–</b> (gerador Mersenne Twister, compatível com <code>random.Random</code> do Python).</p>
+      </div>
+
+      <div class="card">
+        <h3>📈 Trajetória do saldo</h3>
+        <svg class="spark" id="spark" viewBox="0 0 320 120" preserveAspectRatio="none" role="img" aria-labelledby="spark-desc"><desc id="spark-desc">Gráfico do saldo ao longo das rodadas</desc></svg>
+        <div class="legend"><span><i class="sw" style="background:var(--moss)"></i>Saldo</span><span><i class="sw" style="background:repeating-linear-gradient(90deg,var(--terra-ink) 0 4px,transparent 4px 7px)"></i>Saldo inicial</span></div>
+      </div>
+
+      <div class="card">
+        <h3>🕘 Últimos giros</h3>
+        <ul class="history" id="hist" tabindex="0" aria-label="Últimos giros, do mais recente ao mais antigo"></ul>
+      </div>
+    </aside>
+      <div class="card box g-pay">
+      <h3>📜 Tabela de pagamentos (linha central)</h3>
+      <div class="table-wrap" style="border:none;background:transparent">
+        <table class="paytable" id="paytable">
+          <thead><tr><th scope="col">Linha central</th><th scope="col" class="num">Prêmio P</th><th scope="col" class="num">Lucro X</th><th scope="col" class="num">Probabilidade</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="note" id="paytable-note"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ADMIN ============ -->
+<section id="tela-admin" class="screen hidden" aria-labelledby="t-admin">
+  <div class="admin-head">
+    <div>
+      <span class="badge moss">Painel do administrador</span>
+      <h1 id="t-admin" tabindex="-1">Gestão &amp; Métricas</h1>
+      <p class="hint" style="font-size:.95rem">Balanço fictício da casa, regras da máquina e histórico salvo neste navegador.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span class="label" id="lbl-periodo">Período:</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lbl-periodo" id="seg-periodo">
+        <button type="button" role="radio" data-p="hoje">Hoje</button>
+        <button type="button" role="radio" data-p="7d">Últimos 7 dias</button>
+        <button type="button" role="radio" data-p="tudo">Tudo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Seções do painel" id="tabs">
+    <button role="tab" id="tab-visao" aria-controls="pn-visao" type="button">Visão geral &amp; Lucros</button>
+    <button role="tab" id="tab-regras" aria-controls="pn-regras" type="button">Regras &amp; Pagamentos</button>
+    <button role="tab" id="tab-hist" aria-controls="pn-hist" type="button">Histórico de giros</button>
+    <button role="tab" id="tab-jog" aria-controls="pn-jog" type="button">Jogadores &amp; Sessões</button>
+    <button role="tab" id="tab-dados" aria-controls="pn-dados" type="button">Dados</button>
+  </div>
+
+  <!-- Visão geral -->
+  <div role="tabpanel" id="pn-visao" aria-labelledby="tab-visao" tabindex="0">
+    <div class="kpis" id="kpis"></div>
+    <div class="two-col">
+      <div class="stack">
+        <div class="card box">
+          <h2>Balanço diário (últimos 7 dias)</h2>
+          <p class="desc">Créditos apostados × prêmios pagos por dia. A diferença é o resultado da casa.</p>
+          <div class="legend"><span><i class="sw box" style="background:var(--moss)"></i>Apostado</span><span><i class="sw box" style="background:var(--terra)"></i>Prêmios pagos</span></div>
+          <svg class="chart" id="chart-dias" viewBox="0 0 420 220" role="img" aria-labelledby="chart-dias-desc"><desc id="chart-dias-desc">Barras por dia</desc></svg>
+          <div class="table-wrap" style="margin-top:10px"><table class="data" id="tab-dias" style="min-width:420px"></table></div>
+        </div>
+        <div class="card box">
+          <h2>Saldos iniciais escolhidos</h2>
+          <p class="desc">Quantas sessões começaram com cada saldo (no período).</p>
+          <div id="dist-saldos"></div>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card box">
+          <h2>Resultado acumulado da casa</h2>
+          <p class="desc">Soma de (aposta − prêmio) giro a giro, comparada ao valor esperado pela tabela vigente em cada giro.</p>
+          <div class="legend"><span><i class="sw" style="background:var(--moss)"></i>Observado</span><span><i class="sw" style="background:repeating-linear-gradient(90deg,var(--ink) 0 4px,transparent 4px 7px)"></i>Esperado</span></div>
+          <svg class="chart" id="chart-acum" viewBox="0 0 640 260" role="img" aria-labelledby="chart-acum-desc"><desc id="chart-acum-desc">Linha do resultado acumulado</desc></svg>
+          <p class="note" id="acum-note"></p>
+        </div>
+        <div class="card box">
+          <h2>Integridade do modelo</h2>
+          <p class="desc">Frequência de cada símbolo nas células centrais (referência: 20% cada, pois cada parada tem chance 1/5).</p>
+          <div id="integridade"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Regras -->
+  <div role="tabpanel" id="pn-regras" aria-labelledby="tab-regras" tabindex="0" hidden>
+    <div class="two-col">
+      <div class="stack">
+        <div class="locked">
+          <strong>🔒 Regras fixas (Seção 5 do enunciado)</strong>
+          <ul>
+            <li>Rolo circular com 5 símbolos (A, B, C, D, E); cada parada K tem chance 1/5.</li>
+            <li>Três rolos independentes; janela mostra R[K], R[(K+1) mod 5], R[(K+2) mod 5].</li>
+            <li>Só a linha central é avaliada e só paga com três símbolos iguais.</li>
+            <li>Aposta fixa de 1 crédito; sem bônus, multiplicadores ou mudança de chances após perdas.</li>
+            <li>Semente iniciada uma única vez por sessão, nunca a cada rodada.</li>
+          </ul>
+        </div>
+        <div class="card box">
+          <h2>Saldos iniciais oferecidos</h2>
+          <p class="desc">Opções da tela "Passo 3". O jogador também pode digitar outro valor até o máximo.</p>
+          <div class="form-grid">
+            <div class="field"><label for="cfg-s0">Opção 1</label><input class="input" id="cfg-s0" type="number" min="1" max="100000" step="1"></div>
+            <div class="field"><label for="cfg-s1">Opção 2</label><input class="input" id="cfg-s1" type="number" min="1" max="100000" step="1"></div>
+            <div class="field"><label for="cfg-s2">Opção 3</label><input class="input" id="cfg-s2" type="number" min="1" max="100000" step="1"></div>
+          </div>
+          <div class="field" style="margin-top:10px"><label for="cfg-smax">Máximo para "outro valor"</label><input class="input" id="cfg-smax" type="number" min="1" max="100000" step="1"></div>
+        </div>
+        <div class="card box">
+          <h2>Semente do gerador</h2>
+          <p class="desc">Com semente fixa, toda sessão nova repete a mesma sequência (útil para conferir com o notebook: semente 2026 reproduz o Experimento 1).</p>
+          <div class="inline-radios" role="radiogroup" aria-label="Modo da semente">
+            <label><input type="radio" name="cfg-seed-modo" value="auto"> Automática (registrada)</label>
+            <label><input type="radio" name="cfg-seed-modo" value="fixa"> Fixa</label>
+          </div>
+          <div class="field" style="margin-top:10px"><label for="cfg-seed">Semente fixa (0 a 4.294.967.295)</label><input class="input" id="cfg-seed" type="number" min="0" max="4294967295" step="1"></div>
+        </div>
+        <div class="card box">
+          <h2>PIN do administrador</h2>
+          <p class="desc">Proteção simples para uso em sala; não é um mecanismo de segurança.</p>
+          <div class="field"><label for="cfg-pin">Novo PIN (4 a 8 dígitos)</label><input class="input" id="cfg-pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="8"></div>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card box">
+          <h2>Tabela de pagamentos e símbolos</h2>
+          <p class="desc">Altere o prêmio de cada trio e a fruta que representa cada letra. As probabilidades não mudam (1/125 por trio). As alterações valem para as próximas sessões.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" role="group" aria-label="Tabelas prontas">
+            <button class="btn btn-ghost btn-sm" type="button" data-preset="base">Base (RTP 84%)</button>
+            <button class="btn btn-ghost btn-sm" type="button" data-preset="mais10">+10% (E5, 92,4%)</button>
+            <button class="btn btn-ghost btn-sm" type="button" data-preset="plana">Plana (84%)</button>
+            <button class="btn btn-ghost btn-sm" type="button" data-preset="concentrada">Concentrada (84%)</button>
+          </div>
+          <div class="table-wrap" style="border:none;background:transparent">
+            <table class="pay-edit" id="pay-edit"><thead><tr><th scope="col">Letra</th><th scope="col">Fruta</th><th scope="col">Prêmio P (créditos)</th><th scope="col" class="num">Lucro X</th><th scope="col" class="num">P × 1/125</th></tr></thead><tbody></tbody></table>
+          </div>
+          <span class="error" id="regras-erro" role="alert"></span>
+          <div class="metrics" id="metricas-regras" aria-live="polite"></div>
+          <p class="note" id="regras-veredito"></p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="btn btn-secondary" id="btn-restaurar" type="button">Restaurar padrões</button>
+          <button class="btn btn-ghost" id="btn-descartar" type="button">Descartar alterações</button>
+          <button class="btn btn-primary" id="btn-salvar" type="button">💾 Salvar alterações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Histórico -->
+  <div role="tabpanel" id="pn-hist" aria-labelledby="tab-hist" tabindex="0" hidden>
+    <div class="card box">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+        <div><h2>Auditoria de giros</h2><p class="desc" style="margin:0">Cada giro registrado: paradas sorteadas, linha central, prêmio, lucro e saldo.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+          <div class="field"><label for="f-jog">Jogador</label><select class="input" id="f-jog" style="min-width:160px"></select></div>
+          <button class="btn btn-ghost btn-sm" id="btn-csv-rod" type="button">⬇ Exportar CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table class="data" id="tab-rod"></table></div>
+      <div class="pager"><span id="pg-info"></span><span style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" id="pg-prev" type="button">Anterior</button><button class="btn btn-ghost btn-sm" id="pg-next" type="button">Próxima</button></span></div>
+    </div>
+  </div>
+
+  <!-- Jogadores -->
+  <div role="tabpanel" id="pn-jog" aria-labelledby="tab-jog" tabindex="0" hidden>
+    <div class="stack">
+      <div class="card box">
+        <h2>Jogadores</h2>
+        <p class="desc">Resultado de cada jogador no período (do ponto de vista do jogador: prêmios − apostas).</p>
+        <div class="table-wrap"><table class="data" id="tab-jog"></table></div>
+      </div>
+      <div class="card box">
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+          <div><h2>Sessões</h2><p class="desc" style="margin:0">Condições de cada sessão: semente, saldo e RTP da tabela usada.</p></div>
+          <button class="btn btn-ghost btn-sm" id="btn-csv-ses" type="button">⬇ Exportar CSV</button>
+        </div>
+        <div class="table-wrap"><table class="data" id="tab-ses"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dados -->
+  <div role="tabpanel" id="pn-dados" aria-labelledby="tab-dados" tabindex="0" hidden>
+    <div class="two-col">
+      <div class="card box">
+        <h2>Armazenamento local</h2>
+        <p class="desc">Os dados ficam só neste navegador (localStorage). Limpar os dados do site apaga o histórico; exporte um backup antes.</p>
+        <div class="stats" id="armaz"></div>
+        <p class="note" id="armaz-status"></p>
+      </div>
+      <div class="card box">
+        <h2>Backup e limpeza</h2>
+        <p class="desc">O backup em JSON guarda configuração, sessões e giros. Importar substitui os dados atuais.</p>
+        <div style="display:grid;gap:10px">
+          <button class="btn btn-secondary" id="btn-json" type="button">⬇ Exportar backup (JSON)</button>
+          <label class="btn btn-secondary" for="inp-import" style="cursor:pointer">⬆ Importar backup (JSON)</label>
+          <input id="inp-import" type="file" accept="application/json,.json" class="sr-only">
+          <button class="btn btn-danger" id="btn-limpar" type="button">🗑 Apagar todas as sessões e giros</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p>FrutiMania © simulação didática – Probabilidade e Estatística I (IFES). Nenhum valor real é apostado ou transferido.</p>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <span>Teclado: <span class="kbd">Tab</span> navega · <span class="kbd">Espaço</span> gira</span>
+      <button class="link-btn" id="btn-admin" type="button">Área do administrador</button>
+    </div>
+  </div>
+</footer>
+
+<!-- Diálogos -->
+<dialog id="dlg-pin" aria-labelledby="dlg-pin-t">
+  <form method="dialog" class="dlg" id="form-pin">
+    <div class="icon" aria-hidden="true">🔐</div>
+    <h2 id="dlg-pin-t">Área do administrador</h2>
+    <p>Digite o PIN para acessar regras e métricas. PIN padrão: 1234.</p>
+    <div class="field" style="margin-top:14px"><label for="inp-pin">PIN</label><input class="input" id="inp-pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" aria-describedby="pin-erro"><span class="error" id="pin-erro" role="alert"></span></div>
+    <div class="actions"><button class="btn btn-primary" type="submit" value="ok">Entrar</button><button class="btn btn-secondary" type="button" id="pin-cancel">Cancelar</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-fim" aria-labelledby="dlg-fim-t" aria-describedby="dlg-fim-d">
+  <div class="dlg">
+    <div class="icon" aria-hidden="true" id="dlg-fim-ic">🍂</div>
+    <h2 id="dlg-fim-t">Sessão encerrada</h2>
+    <p id="dlg-fim-d"></p>
+    <div class="stats" id="dlg-fim-stats"></div>
+    <p class="note" id="dlg-fim-edu" style="text-align:left"></p>
+    <div class="actions">
+      <button class="btn btn-primary" id="fim-nova" type="button">🔄 Nova sessão</button>
+      <button class="btn btn-secondary" id="fim-trocar" type="button">Trocar jogador</button>
+      <button class="btn btn-ghost" id="fim-sair" type="button">Sair</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="dlg-confirm" aria-labelledby="dlg-c-t" aria-describedby="dlg-c-d">
+  <div class="dlg">
+    <div class="icon" aria-hidden="true">⚠️</div>
+    <h2 id="dlg-c-t">Confirmar</h2>
+    <p id="dlg-c-d"></p>
+    <div class="actions"><button class="btn btn-danger" id="c-ok" type="button">Confirmar</button><button class="btn btn-secondary" id="c-cancel" type="button">Cancelar</button></div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"><span aria-hidden="true">✅</span><span id="toast-msg"></span></div>
+
+<!-- A ordem importa: cada arquivo usa funções dos anteriores -->
+<script src="js/gerador.js"></script>
+<script src="js/modelo.js"></script>
+<script src="js/armazenamento.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/jogo.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
